@@ -2,7 +2,34 @@ import streamlit as st
 import requests
 from datetime import datetime, timedelta
 
-st.title("📄 Visualizar DJE do TJRR")
+# CSS para cards modernos e layout
+card_style = """
+<style>
+body {
+    margin: 0;
+    padding: 0;
+}
+.card {
+    background-color: #ffffff;
+    border: 1px solid #e0e0e0;
+    border-radius: 15px;
+    padding: 25px;
+    margin: 15px 0;
+    box-shadow: 0 6px 12px rgba(0,0,0,0.15);
+}
+.title-card {
+    text-align: center;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    font-size: 2em;
+    font-weight: bold;
+}
+</style>
+"""
+st.markdown(card_style, unsafe_allow_html=True)
+
+# Card 1: Título
+st.markdown('<div class="card title-card">📄 Visualizar DJE do TJRR</div>', unsafe_allow_html=True)
 
 # Função para verificar se DJE existe (usando HEAD para eficiência)
 def check_dje_available(date):
@@ -24,22 +51,7 @@ def find_latest_dje(start_date, max_days=30):
         current -= timedelta(days=1)
     return None, None
 
-# CSS para cards modernos
-card_style = """
-<style>
-.card {
-    background-color: #ffffff;
-    border: 1px solid #e0e0e0;
-    border-radius: 10px;
-    padding: 20px;
-    margin: 10px 0;
-    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
-}
-</style>
-"""
-st.markdown(card_style, unsafe_allow_html=True)
-
-# Card 1: DJE Disponível Automaticamente
+# Card 2: DJE Disponível Automaticamente
 st.markdown('<div class="card">', unsafe_allow_html=True)
 st.subheader("📅 DJE Disponível")
 
@@ -65,7 +77,7 @@ if url:
 
 st.markdown('</div>', unsafe_allow_html=True)
 
-# Card 2: Buscar Data Específica
+# Card 3: Buscar Data Específica
 st.markdown('<div class="card">', unsafe_allow_html=True)
 st.subheader("🔍 Buscar Data Específica")
 
