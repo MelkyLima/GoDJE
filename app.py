@@ -32,7 +32,7 @@ body {
 st.markdown(card_style, unsafe_allow_html=True)
 
 # Card 1: Título
-st.markdown('<div class="card title-card">📄 Visualizar DJE do TJRR</div>', unsafe_allow_html=True)
+st.markdown('<div class="card title-card">📄 GoDJE - DJE do Dia</div>', unsafe_allow_html=True)
 
 # Função para verificar se DJE existe (usando HEAD para eficiência)
 def check_dje_available(date):
