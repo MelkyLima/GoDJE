@@ -17,6 +17,9 @@ body {
     margin: 15px 0;
     box-shadow: 0 6px 12px rgba(0,0,0,0.15);
 }
+.card:empty {
+    display: none !important;
+}
 .title-card {
     text-align: center;
     background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
