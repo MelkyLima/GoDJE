@@ -8,55 +8,31 @@ card_style = """
 body {
     margin: 0;
     padding: 0;
-    background: #0f172a;
-    color: #f8fafc;
 }
 .card {
-    border: none;
-    border-radius: 20px;
-    padding: 28px;
-    margin: 16px 0;
-    box-shadow: 0 16px 40px rgba(15, 23, 42, 0.35);
+    background-color: #ffffff;
+    border: 1px solid #e0e0e0;
+    border-radius: 15px;
+    padding: 25px;
+    margin: 15px 0;
+    box-shadow: 0 6px 12px rgba(0,0,0,0.15);
 }
-.card-title {
+.card:empty {
+    display: none !important;
+}
+.title-card {
+    text-align: center;
     background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
     color: white;
-    text-align: center;
-    font-size: 2rem;
-    font-weight: 800;
-}
-.card-blue {
-    background: linear-gradient(135deg, #1d4ed8 0%, #3b82f6 100%);
-    color: white;
-}
-.card-green {
-    background: linear-gradient(135deg, #047857 0%, #10b981 100%);
-    color: white;
-}
-.card * {
-    color: inherit;
-}
-.link-button {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    background: #f97316;
-    color: white;
-    padding: 0.75rem 1.4rem;
-    border-radius: 999px;
-    text-decoration: none;
-    font-weight: 700;
-    margin-top: 1rem;
-}
-.link-button:hover {
-    opacity: 0.95;
+    font-size: 2em;
+    font-weight: bold;
 }
 </style>
 """
 st.markdown(card_style, unsafe_allow_html=True)
 
 # Card 1: Título
-st.markdown('<div class="card card-title">📄 Visualizar DJE do TJRR</div>', unsafe_allow_html=True)
+st.markdown('<div class="card title-card">📄 Visualizar DJE do TJRR</div>', unsafe_allow_html=True)
 
 # Função para verificar se DJE existe (usando HEAD para eficiência)
 def check_dje_available(date):
@@ -79,7 +55,7 @@ def find_latest_dje(start_date, max_days=30):
     return None, None
 
 # Card 2: DJE Disponível Automaticamente
-st.markdown('<div class="card card-blue">', unsafe_allow_html=True)
+st.markdown('<div class="card">', unsafe_allow_html=True)
 st.subheader("📅 DJE Disponível")
 
 # Buscar automaticamente: dia atual ou mais recente
@@ -100,16 +76,12 @@ else:
 st.write(status_msg)
 
 if url:
-    date_display = selected_date.strftime('%d/%m/%Y') if selected_date else ''
-    st.markdown(
-        f'<a class="link-button" href="{url}" target="_blank">VISUALIZAR DJE {date_display}</a>',
-        unsafe_allow_html=True,
-    )
+    st.link_button("VISUALIZAR DJE", url, type="primary")
 
 st.markdown('</div>', unsafe_allow_html=True)
 
 # Card 3: Buscar Data Específica
-st.markdown('<div class="card card-green">', unsafe_allow_html=True)
+st.markdown('<div class="card">', unsafe_allow_html=True)
 st.subheader("🔍 Buscar Data Específica")
 
 selected_specific = st.date_input(
@@ -123,12 +95,8 @@ selected_specific_dt = datetime.combine(selected_specific, datetime.min.time())
 available_specific, url_specific = check_dje_available(selected_specific_dt)
 
 if available_specific:
-    date_display_specific = selected_specific.strftime('%d/%m/%Y')
-    st.success(f"✅ DJE disponível para {date_display_specific}.")
-    st.markdown(
-        f'<a class="link-button" href="{url_specific}" target="_blank">VISUALIZAR DJE {date_display_specific}</a>',
-        unsafe_allow_html=True,
-    )
+    st.success(f"✅ DJE disponível para {selected_specific.strftime('%d/%m/%Y')}.")
+    st.link_button("VISUALIZAR DJE", url_specific, type="primary")
 else:
     st.error(f"❌ DJE não disponível para {selected_specific.strftime('%d/%m/%Y')}.")
 
