@@ -1,76 +1,88 @@
 import streamlit as st
 import requests
-import base64
 from datetime import datetime, timedelta
 
-st.title("Visualizar DJE do TJRR")
+st.title("📄 Visualizar DJE do TJRR")
+
+# Função para verificar se DJE existe (usando HEAD para eficiência)
+def check_dje_available(date):
+    date_str = date.strftime("%Y%m%d")
+    url = f"https://diario.tjrr.jus.br/dpj/dpj-{date_str}.pdf"
+    try:
+        response = requests.head(url, timeout=5)
+        return response.status_code == 200, url
+    except requests.exceptions.RequestException:
+        return False, url
 
 # Função para encontrar o DJE mais recente disponível
 def find_latest_dje(start_date, max_days=30):
     current = start_date
     for _ in range(max_days):
-        date_str = current.strftime("%Y%m%d")
-        url = f"https://diario.tjrr.jus.br/dpj/dpj-{date_str}.pdf"
-        try:
-            response = requests.get(url, timeout=5)
-            if response.status_code == 200:
-                return current, response
-        except requests.exceptions.RequestException:
-            pass
+        available, url = check_dje_available(current)
+        if available:
+            return current, url
         current -= timedelta(days=1)
     return None, None
 
-# Opções de busca
-option = st.radio(
-    "Escolha a opção de busca:",
-    ("Dia atual", "Mais recente disponível", "Selecionar data específica")
-)
+# CSS para cards modernos
+card_style = """
+<style>
+.card {
+    background-color: #ffffff;
+    border: 1px solid #e0e0e0;
+    border-radius: 10px;
+    padding: 20px;
+    margin: 10px 0;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+}
+</style>
+"""
+st.markdown(card_style, unsafe_allow_html=True)
 
-selected_date = None
-response = None
+# Card 1: DJE Disponível Automaticamente
+st.markdown('<div class="card">', unsafe_allow_html=True)
+st.subheader("📅 DJE Disponível")
 
-if option == "Dia atual":
-    selected_date = datetime.now()
-elif option == "Mais recente disponível":
-    st.write("Buscando o DJE mais recente disponível...")
-    selected_date, response = find_latest_dje(datetime.now())
-    if selected_date is None:
-        st.error("Nenhum DJE encontrado nos últimos 30 dias.")
-elif option == "Selecionar data específica":
-    selected_date = st.date_input("Selecione a data:", value=datetime.now(), max_value=datetime.now())
-    selected_date = datetime.combine(selected_date, datetime.min.time())  # converter para datetime
+# Buscar automaticamente: dia atual ou mais recente
+today = datetime.now()
+available_today, url_today = check_dje_available(today)
 
-if selected_date:
-    date_str = selected_date.strftime("%Y%m%d")
-    date_display = selected_date.strftime("%d/%m/%Y")
-    
-    if response is None:  # se não foi obtido na busca mais recente
-        st.write(f"Buscando DJE para a data: {date_display}")
-        url = f"https://diario.tjrr.jus.br/dpj/dpj-{date_str}.pdf"
-        try:
-            response = requests.get(url, timeout=10)
-        except requests.exceptions.RequestException as e:
-            st.error(f"Erro ao acessar o site: {e}")
-            response = None
-    
-    if response and response.status_code == 200:
-        st.success(f"DJE encontrado para {date_display}!")
-        
-        # Botão para download
-        st.download_button(
-            label="Baixar DJE",
-            data=response.content,
-            file_name=f"DJE_{date_str}.pdf",
-            mime="application/pdf",
-            key="download_pdf"
-        )
-        
-        # Visualizar o PDF inline usando iframe
-        pdf_base64 = base64.b64encode(response.content).decode('utf-8')
-        pdf_display = f'<iframe src="data:application/pdf;base64,{pdf_base64}" width="100%" height="600" type="application/pdf"></iframe>'
-        st.components.v1.html(pdf_display, height=600)
-        
-    elif response:
-        st.error(f"DJE não disponível para a data {date_display}. Status: {response.status_code}")
+if available_today:
+    selected_date = today
+    url = url_today
+    status_msg = f"✅ DJE do dia atual ({today.strftime('%d/%m/%Y')}) está disponível."
+else:
+    selected_date, url = find_latest_dje(today)
+    if selected_date:
+        status_msg = f"ℹ️ DJE do dia atual não disponível. Mostrando o mais recente: {selected_date.strftime('%d/%m/%Y')}."
     else:
-        st.error("Não foi possível obter o DJE.")
+        status_msg = "❌ Nenhum DJE encontrado nos últimos 30 dias."
+
+st.write(status_msg)
+
+if url:
+    st.link_button("VISUALIZAR DJE", url, type="primary")
+
+st.markdown('</div>', unsafe_allow_html=True)
+
+# Card 2: Buscar Data Específica
+st.markdown('<div class="card">', unsafe_allow_html=True)
+st.subheader("🔍 Buscar Data Específica")
+
+selected_specific = st.date_input(
+    "Selecione uma data:",
+    value=datetime.now(),
+    max_value=datetime.now(),
+    format="DD/MM/YYYY"
+)
+selected_specific_dt = datetime.combine(selected_specific, datetime.min.time())
+
+available_specific, url_specific = check_dje_available(selected_specific_dt)
+
+if available_specific:
+    st.success(f"✅ DJE disponível para {selected_specific.strftime('%d/%m/%Y')}.")
+    st.link_button("VISUALIZAR DJE", url_specific, type="primary")
+else:
+    st.error(f"❌ DJE não disponível para {selected_specific.strftime('%d/%m/%Y')}.")
+
+st.markdown('</div>', unsafe_allow_html=True)
