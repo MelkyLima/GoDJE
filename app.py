@@ -76,7 +76,8 @@ else:
 st.write(status_msg)
 
 if url:
-    st.link_button("VISUALIZAR DJE", url, type="primary")
+    display_date = selected_date.strftime('%d/%m/%Y') if selected_date else ''
+    st.link_button(f"VISUALIZAR DJE {display_date}", url, type="primary")
 
 st.markdown('</div>', unsafe_allow_html=True)
 
@@ -95,8 +96,9 @@ selected_specific_dt = datetime.combine(selected_specific, datetime.min.time())
 available_specific, url_specific = check_dje_available(selected_specific_dt)
 
 if available_specific:
-    st.success(f"✅ DJE disponível para {selected_specific.strftime('%d/%m/%Y')}.")
-    st.link_button("VISUALIZAR DJE", url_specific, type="primary")
+    display_date_specific = selected_specific.strftime('%d/%m/%Y')
+    st.success(f"✅ DJE disponível para {display_date_specific}.")
+    st.link_button(f"VISUALIZAR DJE {display_date_specific}", url_specific, type="primary")
 else:
     st.error(f"❌ DJE não disponível para {selected_specific.strftime('%d/%m/%Y')}.")
 
